@@ -2,11 +2,8 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import pickle
-import os
-import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from dotenv import load_dotenv
 
 st.set_page_config(page_title="StressPredict", page_icon=":chart_with_upwards_trend:")
 
@@ -80,9 +77,32 @@ else:
         "bullying": "Kamu pernah ngalamin bullying nggak?"
     }
 
+    # Deskripsi kategori untuk setiap faktor
+    category_descriptions = {
+        "self_esteem": ["Nggak percaya diri", "Cukup percaya diri", "Sangat percaya diri"],
+        "depression": ["Jarang merasa depresi", "Kadang-kadang merasa depresi", "Sering merasa depresi"],
+        "headache": ["Jarang sakit kepala", "Kadang-kadang sakit kepala", "Sering sakit kepala"],
+        "blood_pressure": ["Rendah", "Sedang", "Tinggi"],
+        "sleep_quality": ["Buruk", "Sedang", "Baik"],
+        "breathing_problem": ["Jarang", "Kadang-kadang", "Sering"],
+        "noise_level": ["Tenang", "Sedang bising", "Sangat bising"],
+        "living_conditions": ["Nggak layak", "Cukup layak", "Sangat layak"],
+        "safety": ["Nggak aman", "Cukup aman", "Sangat aman"],
+        "basic_needs": ["Nggak terpenuhi", "Sebagian terpenuhi", "Terpenuhi"],
+        "academic_performance": ["Buruk", "Sedang", "Baik"],
+        "study_load": ["Ringan", "Sedang", "Berat"],
+        "teacher_student_relationship": ["Buruk", "Cukup baik", "Sangat baik"],
+        "future_career_concerns": ["Tidak khawatir", "Cukup khawatir", "Sangat khawatir"],
+        "social_support": ["Tidak ada dukungan", "Sedikit dukungan", "Banyak dukungan"],
+        "peer_pressure": ["Tidak pernah", "Kadang-kadang", "Sering"],
+        "extracurricular_activities": ["Tidak aktif", "Cukup aktif", "Sangat aktif"],
+        "bullying": ["Tidak pernah", "Kadang-kadang", "Sering"]
+    }
+
+    # Saran untuk setiap tingkat stres
     stress_level_advice = {
         "Ringan": "Stres kamu masih ringan kok! Tetap jaga pola hidup sehat ya, seperti makan teratur, tidur cukup, dan jangan lupa gerak badan. Santai aja, semua pasti baik-baik aja!",
-        "Sedang": "Hmm, stres kamu ada di tingkat sedang nih. Coba deh cari waktu buat istirahat, ngobrol sama teman atau keluarga, atau coba relaksasi kayak yoga atau meditasi. Jangan dipendem sendiri, ya!",
+        "Sedang": "Hmm, stres kamu ada di tingkat sedang nih. Coba deh cari waktu buat istirahat, ngobrol sama teman atau keluarga, atau coba relaksasi kayak meditasi atau denger musik. Jangan dipendem sendiri, ya!",
         "Berat": "Wah, stres kamu udah di tingkat berat nih. Jangan anggap enteng ya. Kalau bisa, segera ngobrol sama psikolog atau konselor. Kadang kita perlu bantuan orang lain buat lepas dari tekanan. Kamu nggak sendiri kok!"
     }
 
@@ -94,12 +114,22 @@ else:
 
     for col in X.columns:
         if col == "mental_health_history":
-            value = st.radio(f"{questions[col]}", options=[0, 1], format_func=lambda x: "Nggak punya" if x == 0 else "Punya")
+            value = st.radio(
+                f"{questions[col]}",
+                options=[0, 1],
+                format_func=lambda x: "Nggak punya" if x == 0 else "Punya"
+            )
         else:
             min_val, max_val = int(min_max_values[col][0]), int(min_max_values[col][1])
             value = st.slider(f"{questions[col]}", min_val, max_val, step=1)
 
+            # Mendapatkan label kategori
+            num_categories = len(category_descriptions[col])
+            category_idx = min((value - min_val) * num_categories // (max_val - min_val + 1), num_categories - 1)
+            st.write(f"Keterangan: {category_descriptions[col][category_idx]}")
+
         user_input.append(value)
+        st.divider()  # Pembatas antar pertanyaan
 
     if st.button("Prediksi"):
         user_input = np.array(user_input).reshape(1, -1)
