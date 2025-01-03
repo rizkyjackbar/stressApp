@@ -5,7 +5,6 @@ import pickle
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import json
-import streamlit as st
 
 st.set_page_config(page_title="StressPredict", page_icon=":chart_with_upwards_trend:")
 
