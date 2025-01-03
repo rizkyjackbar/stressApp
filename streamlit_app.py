@@ -4,6 +4,8 @@ import pandas as pd
 import pickle
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+import json
+import streamlit as st
 
 st.set_page_config(page_title="StressPredict", page_icon=":chart_with_upwards_trend:")
 
@@ -12,11 +14,9 @@ def save_to_google_sheets(user_name, stress_level_label):
         # Scope untuk Google Sheets API
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-        # Path ke file credentials.json
-        credentials_path = "credentials.json"
-
-        # Load kredensial dari file JSON
-        creds = ServiceAccountCredentials.from_json_keyfile_name(credentials_path, scope)
+        # Load kredensial dari secrets Streamlit
+        creds_dict = json.loads(st.secrets["google_credentials"])
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         client = gspread.authorize(creds)
 
         # Akses spreadsheet
