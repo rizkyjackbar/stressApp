@@ -16,7 +16,7 @@ def save_to_google_sheets(user_name, stress_level_label):
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
         # Load kredensial dari secrets Streamlit
-        creds_dict = json.loads(st.secrets["google_credentials"])
+        creds_dict = dict(st.secrets["google_credentials"])  # Konversi AttrDict ke dictionary
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         print("Kredensial berhasil dimuat.")
 
