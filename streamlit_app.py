@@ -10,22 +10,29 @@ st.set_page_config(page_title="StressPredict", page_icon=":chart_with_upwards_tr
 
 def save_to_google_sheets(user_name, stress_level_label):
     try:
+        print("Memulai proses menyimpan data ke Google Sheets...")
+
         # Scope untuk Google Sheets API
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
         # Load kredensial dari secrets Streamlit
         creds_dict = json.loads(st.secrets["google_credentials"])
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        print("Kredensial berhasil dimuat.")
+
+        # Autentikasi dan akses client
         client = gspread.authorize(creds)
+        print("Google Sheets API berhasil diotorisasi.")
 
         # Akses spreadsheet
         sheet = client.open("StressPredictResults").sheet1
+        print("Spreadsheet berhasil diakses.")
 
         # Tambahkan data ke spreadsheet
         sheet.append_row([user_name, stress_level_label])
-        print(f"Data berhasil disimpan ke Google Sheets: {user_name}, {stress_level_label}")
+        print(f"Data berhasil disimpan: {user_name}, {stress_level_label}")
     except Exception as e:
-        print(f"Error saving to Google Sheets: {e}")
+        print(f"Terjadi kesalahan saat menyimpan ke Google Sheets: {e}")
 
 # Load model dan scaler dari .pkl
 with open('stress_level_model.pkl', 'rb') as f:
@@ -128,8 +135,8 @@ else:
             st.write(f"Keterangan: {category_descriptions[col][category_idx]}")
 
         user_input.append(value)
-        st.divider()  # Pembatas antar pertanyaan
-
+        st.divider()
+        
     if st.button("Prediksi"):
         user_input = np.array(user_input).reshape(1, -1)
         user_input = scaler.transform(user_input)
