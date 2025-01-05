@@ -58,7 +58,27 @@ if not user_name.strip():
 else:
     # Input dari pengguna
     user_input = []
-    min_max_values = {col: (data[col].min(), data[col].max()) for col in X.columns}
+    min_max_values = {
+        "self_esteem": (0, 100),
+        "mental_health_history": (0, 1),
+        "depression": (0, 100),
+        "headache": (0, 100),
+        "blood_pressure": (0, 100),
+        "sleep_quality": (0, 100),
+        "breathing_problem": (0, 100),
+        "noise_level": (0, 100),
+        "living_conditions": (0, 100),
+        "safety": (0, 100),
+        "basic_needs": (0, 100),
+        "academic_performance": (0, 100),
+        "study_load": (0, 100),
+        "teacher_student_relationship": (0, 100),
+        "future_career_concerns": (0, 100),
+        "social_support": (0, 100),
+        "peer_pressure": (0, 100),
+        "extracurricular_activities": (0, 100),
+        "bullying": (0, 100)
+    }
 
     # Pertanyaan spesifik untuk setiap faktor
     questions = {
@@ -126,8 +146,8 @@ else:
                 format_func=lambda x: "Nggak punya" if x == 0 else "Punya"
             )
         else:
-            min_val, max_val = int(min_max_values[col][0]), int(min_max_values[col][1])
-            value = st.slider(f"{questions[col]}", min_val, max_val, step=1)
+            min_val, max_val = min_max_values[col]
+            value = st.slider(f"{questions[col]}", min_val, max_val, step=1, format="%d%%")
 
             # Mendapatkan label kategori
             num_categories = len(category_descriptions[col])
