@@ -16,7 +16,7 @@ def save_to_google_sheets(user_name, stress_level_label):
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
         # Load kredensial dari secrets Streamlit
-        creds_dict = dict(st.secrets["google_credentials"])  # Konversi AttrDict ke dictionary
+        creds_dict = dict(st.secrets["google_credentials"])
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         print("Kredensial berhasil dimuat.")
 
@@ -34,13 +34,13 @@ def save_to_google_sheets(user_name, stress_level_label):
     except Exception as e:
         print(f"Terjadi kesalahan saat menyimpan ke Google Sheets: {e}")
 
-# Load model dan scaler dari .pkl
+# Load model dan scaler
 with open('stress_level_model.pkl', 'rb') as f:
     saved_objects = pickle.load(f)
 model = saved_objects['model']
 scaler = saved_objects['scaler']
 
-# Load dataset untuk informasi kolom dan skala
+# Load dataset
 url = 'StressLevelDataset.csv'
 data = pd.read_csv(url)
 X = data.drop(['stress_level', 'anxiety_level'], axis=1)
@@ -49,14 +49,13 @@ X = data.drop(['stress_level', 'anxiety_level'], axis=1)
 st.title("Prediksi Tingkat Stres")
 st.write("Jawab pertanyaan berikut untuk memprediksi tingkat stres kamu.")
 
-# Input nama pengguna
 user_name = st.text_input("Boleh dong, ketik nama kamu dulu!", placeholder="Contoh: Jackbar")
 
-# Memastikan user menginputkan nama
+# User input nama
 if not user_name.strip():
     st.warning("Tak kenal maka tak sayang lohhh, hehehe")
 else:
-    # Input dari pengguna
+    # Input user
     user_input = []
     min_max_values = {
         "self_esteem": (0, 100),
@@ -80,7 +79,6 @@ else:
         "bullying": (0, 100)
     }
 
-    # Pertanyaan spesifik untuk setiap faktor
     questions = {
         "self_esteem": "Seberapa percaya diri kamu sama kemampuan dirimu?",
         "mental_health_history": "Kamu punya riwayat gangguan kesehatan mental nggak?",
@@ -103,7 +101,6 @@ else:
         "bullying": "Kamu pernah ngalamin bullying nggak?"
     }
 
-    # Deskripsi kategori untuk setiap faktor
     category_descriptions = {
         "self_esteem": ["Nggak percaya diri", "Cukup percaya diri", "Sangat percaya diri"],
         "depression": ["Jarang merasa depresi", "Kadang-kadang merasa depresi", "Sering merasa depresi"],
@@ -124,8 +121,7 @@ else:
         "extracurricular_activities": ["Tidak aktif", "Cukup aktif", "Sangat aktif"],
         "bullying": ["Tidak pernah", "Kadang-kadang", "Sering"]
     }
-
-    # Saran untuk setiap tingkat stres
+    
     stress_level_advice = {
         "Ringan": "Stres kamu masih ringan kok! Tetap jaga pola hidup sehat ya, seperti makan teratur, tidur cukup, dan jangan lupa gerak badan. Santai aja, semua pasti baik-baik aja!",
         "Sedang": "Hmm, stres kamu ada di tingkat sedang nih. Coba deh cari waktu buat istirahat, ngobrol sama teman atau keluarga, atau coba relaksasi kayak meditasi atau denger musik. Jangan dipendem sendiri, ya!",
@@ -149,7 +145,7 @@ else:
             min_val, max_val = min_max_values[col]
             value = st.slider(f"{questions[col]}", min_val, max_val, step=1, format="%d%%")
 
-            # Mendapatkan label kategori
+            # Label kategori
             num_categories = len(category_descriptions[col])
             category_idx = min((value - min_val) * num_categories // (max_val - min_val + 1), num_categories - 1)
             st.write(f"Keterangan: {category_descriptions[col][category_idx]}")
